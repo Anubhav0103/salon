@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Signup - Salon Booking</title>
+    <link rel="stylesheet" href="/views/style/main.css">
+</head>
+<body class="auth-page business">
+    <div class="auth-container">
+        <div class="auth-header">
+            <a href="/" class="back-btn">← Back to Home</a>
+            <h1>Business Signup</h1>
+        </div>
+
+        <form id="businessRegisterForm" class="form">
+            <div class="form-group">
+                <label for="businessName">Salon Name</label>
+                <input type="text" id="businessName" name="salon_name" required>
+            </div>
+            <div class="form-group">
+                <label for="businessAddress">Salon Address</label>
+                <textarea id="businessAddress" name="salon_address" rows="3" required></textarea>
+            </div>
+            <div id="map" style="width: 100%; height: 300px;"></div>
+            <div class="form-group">
+                <label for="businessEmail">Email</label>
+                <input type="email" id="businessEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="businessPhone">Phone Number</label>
+                <input type="tel" id="businessPhone" name="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="businessPassword">Password</label>
+                <input type="password" id="businessPassword" name="password" required>
+            </div>
+            <button type="submit" class="submit-btn">Sign Up</button>
+        </form>
+
+        <div class="auth-link">
+            <p>Already have a business account? <a href="/business-login">Login here</a></p>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+    <script src="/views/js/business-signup.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="/views/js/business-signup-map.js"></script>
+</body>
+</html> 

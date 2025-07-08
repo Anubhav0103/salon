@@ -1,0 +1,344 @@
+/* Refined dark feminine theme for salon website */
+:root {
+  --primary-bg: #18101a;
+  --secondary-bg: #2a1832;
+  --accent: #e75480;
+  --accent2: #a259a6;
+  --accent3: #f8bbd0;
+  --gold: #ffd6a5;
+  --text: #f8e1f4;
+  --text-light: #fff;
+  --border: #3a2352;
+  --input-bg: #23162b;
+  --input-border: #e75480;
+  --shadow: 0 4px 24px 0 #0004;
+}
+
+body {
+  background: var(--primary-bg);
+  color: var(--text);
+  font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  letter-spacing: 0.01em;
+}
+
+nav {
+  background: var(--secondary-bg);
+  padding: 1.2rem 2.5rem;
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+  border-bottom: 2px solid var(--accent);
+  box-shadow: var(--shadow);
+}
+nav a {
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+  padding: 0.2em 0.5em;
+  border-radius: 6px;
+}
+nav a:hover {
+  color: var(--accent);
+  background: var(--accent3);
+}
+
+h1, h2, h3 {
+  color: var(--accent2);
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 1.2rem;
+}
+
+form, .form-section {
+  background: var(--secondary-bg);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  margin: 2.5rem auto;
+  max-width: 480px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+label {
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 0.8rem 1.1rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-light);
+  margin-top: 0.3rem;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px 0 #0002 inset;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent2);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent3);
+}
+button, .choice-btn {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: var(--text-light);
+  border: none;
+  border-radius: 8px;
+  padding: 0.9rem 2.2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1rem;
+  box-shadow: 0 2px 8px 0 #0003;
+  transition: background 0.2s, transform 0.1s;
+  letter-spacing: 0.03em;
+}
+button:hover, .choice-btn:hover {
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  transform: translateY(-2px) scale(1.04);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--secondary-bg);
+  margin: 2.5rem 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+th, td {
+  padding: 1.2rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  background: var(--accent2);
+  color: var(--primary-bg);
+  font-weight: 700;
+  font-size: 1.08rem;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+.salon-item {
+  background: var(--secondary-bg);
+  border: 2px solid var(--accent2);
+  border-radius: 16px;
+  margin: 2rem 0;
+  padding: 2rem 2.5rem;
+  box-shadow: var(--shadow);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.salon-item h3 {
+  color: var(--accent);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+.salon-item .distance {
+  color: var(--gold);
+}
+#bookingModal {
+  background: rgba(30, 10, 40, 0.97);
+  z-index: 1000;
+}
+#bookingModal form {
+  background: var(--primary-bg);
+  border: 2px solid var(--accent2);
+  box-shadow: 0 4px 24px 0 #0005;
+}
+#bookingFeedback {
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 1rem;
+}
+.auth-page, .landing-page {
+  background: linear-gradient(135deg, var(--primary-bg) 60%, var(--accent2) 100%);
+}
+.auth-container, .container {
+  background: var(--secondary-bg);
+  border-radius: 20px;
+  box-shadow: 0 4px 32px 0 #0003;
+  padding: 2.5rem 2rem;
+  margin: 3rem auto;
+  max-width: 1100px;
+}
+.choice-btn {
+  margin-top: 1.5rem;
+}
+input[type="date"], input[type="time"] {
+  color-scheme: dark;
+}
+::-webkit-input-placeholder { color: #f8bbd0; }
+::-moz-placeholder { color: #f8bbd0; }
+:-ms-input-placeholder { color: #f8bbd0; }
+::placeholder { color: #f8bbd0; }
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  form, .form-section, .auth-container, .container {
+    padding: 1.2rem 0.7rem;
+    max-width: 98vw;
+  }
+  .salon-item {
+    padding: 1.2rem 0.7rem;
+  }
+  nav {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.7rem 0.5rem;
+  }
+  table, th, td {
+    font-size: 0.98rem;
+    padding: 0.7rem 0.4rem;
+  }
+}
+
+/* Landing page two-card layout and style */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 90vh;
+  gap: 2.5rem;
+}
+.hero-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hero-content {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+.choice-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 3rem;
+  justify-content: center;
+  align-items: stretch;
+  max-width: 1000px;
+  margin: 2.5rem auto 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+.choice-card {
+  flex: 1 1 320px;
+  max-width: 350px;
+  min-width: 270px;
+  width: 100%;
+  margin: 0 0.5rem;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, var(--secondary-bg) 80%, var(--accent2) 100%);
+  border-radius: 22px;
+  box-shadow: 0 6px 32px 0 #0005;
+  padding: 2.5rem 2.2rem 2.2rem 2.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  border: 2.5px solid var(--accent3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.choice-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 12px 40px 0 #0007;
+  border-color: var(--accent);
+}
+.choice-icon {
+  font-size: 3.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+  text-shadow: 0 2px 8px var(--accent3);
+}
+.hero-title {
+  color: var(--gold);
+  font-size: 2.1rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+.hero-subtitle {
+  color: var(--text);
+  font-size: 1.15rem;
+  text-align: center;
+  margin-bottom: 0.7rem;
+}
+.choice-card h3 {
+  color: var(--gold);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  letter-spacing: 0.03em;
+}
+.choice-card p {
+  color: var(--text);
+  font-size: 1.08rem;
+  text-align: center;
+  margin-bottom: 0.7rem;
+}
+.choice-btn {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: var(--text-light);
+  border: none;
+  border-radius: 8px;
+  padding: 0.9rem 2.2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 8px 0 #0003;
+  transition: background 0.2s, transform 0.1s;
+  letter-spacing: 0.03em;
+}
+.choice-btn:hover {
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  transform: translateY(-2px) scale(1.04);
+}
+@media (max-width: 900px) {
+  .choice-buttons {
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 98vw;
+  }
+  .choice-card {
+    margin: 0 auto;
+    width: 90vw;
+    max-width: 98vw;
+  }
+}
+
+/* Fix input, select, and table overflow for all pages */
+form, .form-section, .auth-container, .container, table {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+input, select, textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .auth-container, .container {
+    max-width: 98vw;
+  }
+} 

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Salon Services</title>
+    <link rel="stylesheet" href="/views/style/main.css">
+</head>
+<body>
+    <nav>
+        <a href="/user-dashboard" id="userDashboardBtn">My Bookings</a>
+    </nav>
+    <h1>Book Salon Services</h1>
+    
+    <div class="form-section">
+        <h3>Step 1: Choose Your Date</h3>
+        <div class="calendar-container">
+            <label>Select Date:
+                <input type="date" id="bookingDate" name="bookingDate" required>
+            </label>
+            <div><small>Choose the date you want to book your appointment</small></div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Step 2: Select Services</h3>
+        <form id="searchForm">
+            <label>Choose Services:
+                <select id="serviceSelect" name="services" multiple size="6" required>
+                    <!-- Options will be populated by JS -->
+                </select>
+                <div><small>Hold Ctrl (Cmd on Mac) to select multiple options</small></div>
+            </label>
+        </form>
+    </div>
+
+    <div class="form-section">
+        <h3>Step 3: Enter Your Location</h3>
+        <label>Your Address:
+            <input type="text" id="userAddress" name="address" placeholder="Enter your address">
+        </label>
+        <button type="button" id="useGeolocation">Use My Location</button>
+    </div>
+
+    <button type="button" id="findSalonsBtn">Find Available Salons</button>
+
+    <h2>Available Salons</h2>
+    <div id="salonResults"></div>
+    
+    <div id="bookingModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:24px; border-radius:8px; max-width:400px; margin:auto; position:relative;">
+            <button id="closeBookingModal" style="position:absolute; top:8px; right:8px;">&times;</button>
+            <h3>Book Appointment</h3>
+            <form id="bookingForm">
+                <input type="hidden" id="modalBusinessId" name="business_id">
+                <input type="hidden" id="modalServiceId" name="service_id">
+                <input type="hidden" id="modalBookingDate" name="booking_date">
+                <div>
+                    <label for="modalTimeSlot">Select Time Slot:</label>
+                    <select id="modalTimeSlot" name="booking_time" required>
+                        <option value="">-- Select a time --</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="modalUserName">Your Name:</label>
+                    <input type="text" id="modalUserName" name="user_name" required>
+                </div>
+                <div>
+                    <label for="modalUserEmail">Email:</label>
+                    <input type="email" id="modalUserEmail" name="user_email">
+                </div>
+                <div>
+                    <label for="modalUserPhone">Phone:</label>
+                    <input type="tel" id="modalUserPhone" name="user_phone">
+                </div>
+                <button type="submit">Confirm Booking</button>
+            </form>
+            <div id="bookingFeedback"></div>
+        </div>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="/views/js/book.js"></script>
+</body>
+</html> 

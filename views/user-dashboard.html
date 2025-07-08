@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard - My Bookings</title>
+    <link rel="stylesheet" href="/views/style/main.css">
+</head>
+<body>
+    <nav>
+        <a href="/book">Book a Service</a>
+        <a href="/user-login" onclick="localStorage.removeItem('user');">Logout</a>
+    </nav>
+    <h1>My Bookings</h1>
+    <table border="1" id="userBookingsTable">
+        <thead>
+            <tr>
+                <th>Salon</th>
+                <th>Service</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Payment</th>
+            </tr>
+        </thead>
+        <tbody id="userBookingsBody"></tbody>
+    </table>
+    <script src="/views/js/user-dashboard.js"></script>
+</body>
+</html> 

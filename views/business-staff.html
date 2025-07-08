@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Staff</title>
+    <link rel="stylesheet" href="/views/style/main.css">
+</head>
+<body>
+    <nav>
+        <a href="/business-services">Manage Services</a> |
+        <a href="/business-appointments">Manage Appointments</a>
+    </nav>
+    <h1>Manage Staff</h1>
+    <form id="addStaffForm">
+        <input type="hidden" id="business_id" name="business_id" value="">
+        <label>Name: <input type="text" id="staffName" name="name" required></label>
+        <label>Email: <input type="email" id="staffEmail" name="email"></label>
+        <label>Phone: <input type="tel" id="staffPhone" name="phone"></label>
+        <label>Role:
+            <select id="staffRole" name="role" required>
+                <option value="">Select Role</option>
+                <option value="Stylist">Stylist</option>
+                <option value="Barber">Barber</option>
+                <option value="Receptionist">Receptionist</option>
+                <option value="Manager">Manager</option>
+                <option value="Nail Technician">Nail Technician</option>
+                <option value="Beautician">Beautician</option>
+                <option value="Other">Other</option>
+            </select>
+        </label>
+        <label>Specializations:
+            <select id="staffSpecializations" name="specializations" multiple size="5">
+                <option value="Haircut">Haircut</option>
+                <option value="Coloring">Coloring</option>
+                <option value="Shaving">Shaving</option>
+                <option value="Facial">Facial</option>
+                <option value="Manicure">Manicure</option>
+                <option value="Pedicure">Pedicure</option>
+                <option value="Massage">Massage</option>
+                <option value="Makeup">Makeup</option>
+                <option value="Threading">Threading</option>
+                <option value="Waxing">Waxing</option>
+                <option value="Other">Other</option>
+            </select>
+            <div><small>Hold Ctrl (Cmd on Mac) to select multiple options</small></div>
+        </label>
+        <label>Working Days:
+            <select id="staffWorkingDays" name="working_days" multiple size="7" required>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+            </select>
+            <div><small>Hold Ctrl (Cmd on Mac) to select multiple options</small></div>
+        </label>
+        <label>Working Hours Start: <input type="time" id="staffWorkingHoursStart" name="working_hours_start" required></label>
+        <label>Working Hours End: <input type="time" id="staffWorkingHoursEnd" name="working_hours_end" required></label>
+        <button type="submit">Add Staff</button>
+    </form>
+    <h2>Staff List</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Specializations</th>
+                <th>Working Days</th>
+                <th>Working Hours</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="staffList"></tbody>
+    </table>
+    <script src="/views/js/business-staff.js"></script>
+</body>
+</html> 

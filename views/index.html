@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon Booking System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/views/style/main.css">
+</head>
+<body class="landing-page">
+    <div class="container">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Welcome to Salon Booking</h1>
+                <p class="hero-subtitle">Book your perfect salon experience or manage your salon business</p>
+                
+                <div class="choice-buttons">
+                    <div class="choice-card" onclick="window.location.href='/user-login'">
+                        <div class="choice-icon">👤</div>
+                        <h3>I'm a Customer</h3>
+                        <p>Book appointments and find the best salons near you</p>
+                        <button class="choice-btn customer-btn">Get Started</button>
+                    </div>
+                    
+                    <div class="choice-card" onclick="window.location.href='/business-login'">
+                        <div class="choice-icon">🏢</div>
+                        <h3>I'm a Business</h3>
+                        <p>Manage your salon, staff, and appointments</p>
+                        <button class="choice-btn business-btn">Get Started</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

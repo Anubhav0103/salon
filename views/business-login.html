@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Login - Salon Booking</title>
+    <link rel="stylesheet" href="/views/style/main.css">
+</head>
+<body class="auth-page business">
+    <div class="auth-container">
+        <div class="auth-header">
+            <a href="/" class="back-btn">← Back to Home</a>
+            <h1>Business Login</h1>
+        </div>
+
+        <form id="businessLoginForm" class="form">
+            <div class="form-group">
+                <label for="businessLoginEmail">Email</label>
+                <input type="email" id="businessLoginEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="businessLoginPassword">Password</label>
+                <input type="password" id="businessLoginPassword" name="password" required>
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+        </form>
+
+        <div class="auth-link">
+            <p>New business? <a href="/business-signup">Sign up here</a></p>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+    <script src="/views/js/business-login.js"></script>
+</body>
+</html> 

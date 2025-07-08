@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Services</title>
+    <link rel="stylesheet" href="/views/style/main.css">
+</head>
+<body>
+    <nav>
+        <a href="/business-staff">Manage Staff</a> |
+        <a href="/business-appointments">Manage Appointments</a>
+    </nav>
+    <h1>Manage Services</h1>
+    <form id="addServiceForm">
+        <input type="hidden" id="business_id" name="business_id" value="">
+        <label>Service(s):
+            <select id="catalogServiceSelect" name="catalog_services" multiple size="7" required>
+                <!-- Options will be populated by JS -->
+            </select>
+            <div><small>Hold Ctrl (Cmd on Mac) to select multiple options</small></div>
+        </label>
+        <label>Description: <input type="text" id="serviceDescription" name="description"></label>
+        <label>Duration (minutes): <input type="number" id="serviceDuration" name="duration" required></label>
+        <label>Price: <input type="number" step="0.01" id="servicePrice" name="price" required></label>
+        <button type="submit">Add Service(s)</button>
+    </form>
+    <h2>Service List</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Duration</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="serviceList"></tbody>
+    </table>
+    <script src="/views/js/business-services.js"></script>
+</body>
+</html> 
