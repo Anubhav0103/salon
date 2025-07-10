@@ -337,6 +337,18 @@ input, select, textarea {
   max-width: 100%;
 }
 
+select, option {
+  color: #222 !important;
+  background: #fff !important;
+  font-size: 1.1em !important;
+}
+
+.filters{
+  color: #222 !important;
+  background: #fff !important;
+  font-size: 1.1em !important;
+}
+
 @media (max-width: 1100px) {
   .auth-container, .container {
     max-width: 98vw;

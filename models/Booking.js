@@ -29,7 +29,16 @@ function getBookingsForStaffOnDate(staff_id, booking_date, callback) {
     });
 }
 
+function getBookingDetailsById(booking_id, callback) {
+    const sql = `SELECT b.*, s.email as staff_email, s.name as staff_name FROM bookings b LEFT JOIN staff s ON b.staff_id = s.staff_id WHERE b.booking_id = ?`;
+    db.query(sql, [booking_id], (err, rows) => {
+        if (err) return callback(err);
+        callback(null, rows && rows[0]);
+    });
+}
+
 module.exports = {
     createBooking,
-    getBookingsForStaffOnDate
+    getBookingsForStaffOnDate,
+    getBookingDetailsById
 }; 

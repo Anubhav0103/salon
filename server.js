@@ -9,6 +9,7 @@ const pageRoutes = require('./routes/pageRoutes');
 const userRoutes = require('./routes/userRoutes');
 const businessRoutes = require('./routes/businessRoutes');
 const businessManageRoutes = require('./routes/businessManageRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 // Import database
 require('./config/database');
@@ -31,6 +32,7 @@ app.use('/', pageRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/businesses', businessRoutes);
 app.use('/api/business-manage', businessManageRoutes);
+app.use('/review', reviewRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

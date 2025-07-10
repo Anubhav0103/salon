@@ -55,6 +55,8 @@ router.get('/business-dashboard', (req, res) => {
                     <li><a href="/business-services.html">Manage Services</a></li>
                     <li><a href="/business-staff.html">Manage Staff</a></li>
                     <li><a href="/business-staff-services.html">Assign Services to Staff</a></li>
+                    <li><a href="/business-appointments.html">Manage Appointments</a></li>
+                    <li><a href="/business-ratings.html">View Staff Ratings</a></li>
                 </ul>
                 <a href="/">Back to Home</a>
             </body>
@@ -85,6 +87,11 @@ router.get('/business-appointments', (req, res) => {
 // Add user dashboard route
 router.get('/user-dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '../views', 'user-dashboard.html'));
+});
+
+// Add business ratings route
+router.get('/business-ratings', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views', 'business-ratings.html'));
 });
 
 module.exports = router; 

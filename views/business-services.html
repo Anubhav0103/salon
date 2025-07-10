@@ -2,15 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manage Services</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Services - Salon Booking</title>
     <link rel="stylesheet" href="/views/style/main.css">
+    <link rel="stylesheet" href="/views/style/business-nav.css">
 </head>
 <body>
-    <nav>
-        <a href="/business-staff">Manage Staff</a> |
-        <a href="/business-appointments">Manage Appointments</a>
+    <nav class="business-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">✨ Salon Manager</a>
+            <div class="nav-links">
+                <a href="/business-services" class="nav-link active">Manage Services</a>
+                <a href="/business-staff" class="nav-link">Manage Staff</a>
+                <a href="/business-appointments" class="nav-link">Manage Appointments</a>
+                <a href="/business-ratings" class="nav-link">Staff Ratings</a>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
     </nav>
-    <h1>Manage Services</h1>
+    <div class="container">
+        <h1>Manage Services</h1>
     <form id="addServiceForm">
         <input type="hidden" id="business_id" name="business_id" value="">
         <label>Service(s):
@@ -37,6 +48,14 @@
         </thead>
         <tbody id="serviceList"></tbody>
     </table>
+    </div>
     <script src="/views/js/business-services.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('business_id');
+            localStorage.removeItem('business_token');
+            window.location.href = '/';
+        }
+    </script>
 </body>
 </html> 

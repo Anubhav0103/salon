@@ -10,16 +10,16 @@ function fetchStaff() {
             (data.staff || []).forEach(staff => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${staff.name}</td>
-                    <td>${staff.email || ''}</td>
-                    <td>${staff.phone || ''}</td>
-                    <td>${staff.role}</td>
-                    <td>${staff.specializations || ''}</td>
-                    <td>${staff.working_days}</td>
-                    <td>${staff.working_hours_start} - ${staff.working_hours_end}</td>
-                    <td>
-                        <button onclick="editStaff(${staff.staff_id})">Edit</button>
-                        <button onclick="deleteStaff(${staff.staff_id})">Delete</button>
+                    <td data-label="Name">${staff.name}</td>
+                    <td data-label="Email" class="hide-on-tablet">${staff.email || ''}</td>
+                    <td data-label="Phone" class="hide-on-tablet">${staff.phone || ''}</td>
+                    <td data-label="Role">${staff.role}</td>
+                    <td data-label="Specializations" class="hide-on-tablet specializations-cell">${staff.specializations || ''}</td>
+                    <td data-label="Working Days" class="hide-on-mobile working-days-cell">${staff.working_days}</td>
+                    <td data-label="Working Hours">${staff.working_hours_start} - ${staff.working_hours_end}</td>
+                    <td data-label="Actions">
+                        <button class="action-btn edit-btn" onclick="editStaff(${staff.staff_id})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deleteStaff(${staff.staff_id})">Delete</button>
                     </td>
                 `;
                 list.appendChild(row);
@@ -58,7 +58,13 @@ document.getElementById('addStaffForm').onsubmit = function(e) {
 window.deleteStaff = function(id) {
     fetch(`/api/business-manage/staff/${id}`, { method: 'DELETE' })
         .then(res => res.json())
-        .then(() => fetchStaff());
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                fetchStaff();
+            }
+        });
 };
 
 window.editStaff = function(id) {

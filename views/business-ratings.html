@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Ratings - Salon Booking</title>
+    <link rel="stylesheet" href="/views/style/business-ratings.css">
+    <link rel="stylesheet" href="/views/style/business-nav.css">
+</head>
+<body>
+    <nav class="business-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">✨ Salon Manager</a>
+            <div class="nav-links">
+                <a href="/business-services" class="nav-link">Manage Services</a>
+                <a href="/business-staff" class="nav-link">Manage Staff</a>
+                <a href="/business-appointments" class="nav-link">Manage Appointments</a>
+                <a href="/business-ratings" class="nav-link active">Staff Ratings</a>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="header">
+            <h1>✨ Staff Ratings</h1>
+            <p>Monitor your team's performance and customer satisfaction</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalReviews">0</div>
+                <div class="stat-label">Total Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgRating">0.0</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalStaff">0</div>
+                <div class="stat-label">Staff Members</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="fiveStarReviews">0</div>
+                <div class="stat-label">5-Star Reviews</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="staffFilter">Staff Member</label>
+                    <select id="staffFilter">
+                        <option value="">All Staff</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="ratingFilter">Rating</label>
+                    <select id="ratingFilter">
+                        <option value="">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="dateFilter">Date Range</label>
+                    <select id="dateFilter">
+                        <option value="">All Time</option>
+                        <option value="7">Last 7 Days</option>
+                        <option value="30">Last 30 Days</option>
+                        <option value="90">Last 3 Months</option>
+                        <option value="180">Last 6 Months</option>
+                        <option value="365">Last Year</option>
+                        <option value="730">Last 2 Years</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="searchFilter">Search</label>
+                    <input type="text" id="searchFilter" placeholder="Search reviews...">
+                </div>
+            </div>
+        </div>
+
+        <div class="ratings-table">
+            <div class="table-header">
+                <div>Staff Member</div>
+                <div>Service</div>
+                <div>Rating</div>
+                <div>Review</div>
+                <div>Customer</div>
+                <div>Date</div>
+            </div>
+            <div id="ratingsBody">
+                <div class="loading">Loading ratings...</div>
+            </div>
+        </div>
+
+        <div class="pagination" id="pagination">
+            <!-- Pagination buttons will be generated here -->
+        </div>
+    </div>
+
+    <script src="/views/js/business-ratings.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('business_id');
+            localStorage.removeItem('business_token');
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html> 

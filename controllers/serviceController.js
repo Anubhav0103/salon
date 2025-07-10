@@ -40,9 +40,12 @@ function editService(req, res) {
 
 function removeService(req, res) {
     const { id } = req.params;
-    deleteService(id, (err) => {
-        if (err) return res.status(500).json({ error: 'Error deleting service' });
-        res.json({ message: 'Service deleted' });
+    deleteService(id, (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        const message = result && result.serviceName 
+            ? `Service "${result.serviceName}" deleted successfully. It has been removed from all staff specializations.`
+            : 'Service deleted successfully';
+        res.json({ message });
     });
 }
 

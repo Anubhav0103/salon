@@ -2,6 +2,15 @@
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('bookingDate').min = today;
 
+// Check if user is logged in and show/hide logout button
+const user = localStorage.getItem('user');
+const logoutBtn = document.getElementById('logoutBtn');
+if (user) {
+    logoutBtn.style.display = 'block';
+} else {
+    logoutBtn.style.display = 'none';
+}
+
 // Fetch available services and populate the select (from service_catalog)
 fetch('/api/business-manage/services-catalog')
     .then(res => res.json())
@@ -305,3 +314,14 @@ bookingForm.onsubmit = function(e) {
         rzp.open();
     });
 }; 
+
+// Logout functionality
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    // Clear user data from localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_token');
+    
+    // Redirect to login page
+    window.location.href = '/user-login';
+}); 

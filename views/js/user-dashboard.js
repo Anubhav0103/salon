@@ -12,13 +12,22 @@ function fetchUserBookings() {
         .then(data => {
             const tbody = document.getElementById('userBookingsBody');
             tbody.innerHTML = '';
-            (data.bookings || []).forEach(b => {
+            // Sort bookings by date and time, newest first
+            const bookings = (data.bookings || []).slice().sort((a, b) => {
+                const dateA = new Date(a.booking_date + 'T' + a.booking_time);
+                const dateB = new Date(b.booking_date + 'T' + b.booking_time);
+                return dateB - dateA;
+            });
+            bookings.forEach(b => {
+                // Format date and time
+                const dateStr = b.booking_date ? new Date(b.booking_date).toISOString().split('T')[0] : '';
+                const timeStr = b.booking_time ? b.booking_time.slice(0,5) : '';
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${b.business_id || ''}</td>
                     <td>${b.service_name}</td>
-                    <td>${b.booking_date}</td>
-                    <td>${b.booking_time}</td>
+                    <td>${dateStr}</td>
+                    <td>${timeStr}</td>
                     <td>${b.status}</td>
                     <td>${b.payment_status === 'paid' ? 'Paid' : 'Unpaid'}</td>
                 `;

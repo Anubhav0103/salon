@@ -1,0 +1,210 @@
+/* Business Staff Page Styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: #E5BEEC;
+    margin-bottom: 20px;
+}
+
+/* Form Styles */
+#addStaffForm {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#addStaffForm label {
+    display: block;
+    margin-bottom: 15px;
+    color: #E5BEEC;
+    font-weight: 500;
+}
+
+#addStaffForm input,
+#addStaffForm select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+#addStaffForm input:focus,
+#addStaffForm select:focus {
+    outline: none;
+    border-color: #E5BEEC;
+}
+
+#addStaffForm button {
+    background: linear-gradient(45deg, #E5BEEC, #A367DC);
+    color: #18122B;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#addStaffForm button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(229, 190, 236, 0.4);
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+thead {
+    background: rgba(229, 190, 236, 0.2);
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+th {
+    color: #E5BEEC;
+    font-weight: 600;
+}
+
+tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 5px;
+    transition: all 0.3s ease;
+}
+
+.edit-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.edit-btn:hover {
+    background: #45a049;
+}
+
+.delete-btn {
+    background: #f44336;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #da190b;
+}
+
+/* Responsive Table */
+@media (max-width: 1024px) {
+    table {
+        font-size: 14px;
+    }
+    
+    th, td {
+        padding: 8px 6px;
+    }
+    
+    /* Hide less important columns on smaller screens */
+    .hide-on-tablet {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    /* Stack table vertically on mobile */
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    tr {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    td {
+        border: none;
+        position: relative;
+        padding: 8px 0;
+        padding-left: 50%;
+        text-align: left;
+    }
+    
+    td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 600;
+        color: #E5BEEC;
+    }
+    
+    /* Hide some columns on mobile */
+    .hide-on-mobile {
+        display: none;
+    }
+    
+    /* Make action buttons full width on mobile */
+    .action-btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+}
+
+/* Special handling for long text */
+.specializations-cell,
+.working-days-cell {
+    max-width: 150px;
+    word-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+    .specializations-cell,
+    .working-days-cell {
+        max-width: none;
+    }
+} 

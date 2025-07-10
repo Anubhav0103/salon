@@ -60,10 +60,17 @@ function editStaff(req, res) {
 function removeStaff(req, res) {
     const { id } = req.params;
     removeAllServicesForStaff(id, (err) => {
-        if (err) return res.status(500).json({ error: 'Error deleting staff services' });
-        deleteStaff(id, (err) => {
-            if (err) return res.status(500).json({ error: 'Error deleting staff' });
-            res.json({ message: 'Staff deleted' });
+        if (err) {
+            console.error('Error removing staff services:', err);
+            return res.status(500).json({ error: 'Error deleting staff services: ' + err.message });
+        }
+        deleteStaff(id, (err, result) => {
+            if (err) {
+                console.error('Error deleting staff:', err);
+                // Provide more detailed error message
+                return res.status(500).json({ error: 'Error deleting staff: ' + err.message });
+            }
+            res.json({ message: 'Staff deleted successfully' });
         });
     });
 }

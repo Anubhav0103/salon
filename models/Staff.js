@@ -35,10 +35,42 @@ function updateStaff(staff_id, staffData, callback) {
 }
 
 function deleteStaff(staff_id, callback) {
-    const sql = `DELETE FROM staff WHERE staff_id = ?`;
-    db.query(sql, [staff_id], (err, result) => {
-        if (err) return callback(err);
-        callback(null, { staff_id });
+    // Only block if there are appointments with status not 'completed' and date >= today
+    const checkSql = `SELECT COUNT(*) as pending_count FROM bookings WHERE staff_id = ? AND (status != 'completed' AND booking_date >= CURDATE())`;
+    db.query(checkSql, [staff_id], (err, rows) => {
+        if (err) {
+            console.error('Error checking pending bookings:', err);
+            return callback(err);
+        }
+        const pendingCount = rows[0].pending_count;
+        if (pendingCount > 0) {
+            return callback(new Error('Cannot delete staff: There are pending or future appointments assigned. Please reassign or complete them first.'));
+        }
+        // Remove staff_services entries first
+        const removeServicesSql = `DELETE FROM staff_services WHERE staff_id = ?`;
+        db.query(removeServicesSql, [staff_id], (err) => {
+            if (err) {
+                console.error('Error removing staff services:', err);
+                return callback(err);
+            }
+            // Remove reviews for this staff
+            const removeReviewsSql = `DELETE FROM reviews WHERE staff_id = ?`;
+            db.query(removeReviewsSql, [staff_id], (err) => {
+                if (err) {
+                    console.error('Error removing staff reviews:', err);
+                    return callback(err);
+                }
+                // Then delete the staff
+                const deleteSql = `DELETE FROM staff WHERE staff_id = ?`;
+                db.query(deleteSql, [staff_id], (err, result) => {
+                    if (err) {
+                        console.error('Error deleting staff:', err);
+                        return callback(err);
+                    }
+                    callback(null, { staff_id });
+                });
+            });
+        });
     });
 }
 
