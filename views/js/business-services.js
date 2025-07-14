@@ -1,5 +1,6 @@
-// Set your business_id here (or fetch from session/localStorage)
-const business_id = localStorage.getItem('business_id') || '';
+// Get business_id from token
+const business = JSON.parse(localStorage.getItem('business'));
+const business_id = localStorage.getItem('business_id');
 document.getElementById('business_id').value = business_id;
 
 let editingServiceId = null;

@@ -4,11 +4,12 @@ let itemsPerPage = getItemsPerPage();
 let allRatings = [];
 let filteredRatings = [];
 
-// Get business_id from localStorage
+// Get business_id from token
+const business = JSON.parse(localStorage.getItem('business'));
 const business_id = localStorage.getItem('business_id');
 
-if (!business_id) {
-    alert('No business_id found. Please log in as a business.');
+if (!business || !business_id) {
+    alert('No business info found. Please log in as a business.');
     window.location.href = '/business-login';
 }
 
@@ -70,7 +71,6 @@ function populateStaffFilter() {
     staffFilter.innerHTML = '<option value="">All Staff</option>';
     
     // Always fetch staff from business to populate dropdown
-    const business_id = localStorage.getItem('business_id');
     if (business_id) {
         fetch(`/api/business-manage/staff?business_id=${business_id}`)
             .then(res => res.json())
@@ -84,15 +84,13 @@ function populateStaffFilter() {
                         option.textContent = staff.name || `Staff ${staff.staff_id}`;
                         staffFilter.appendChild(option);
                     });
-                } else {
-                    console.log('No staff found for business');
                 }
             })
             .catch(error => {
                 console.error('Error fetching staff:', error);
             });
     } else {
-        console.error('No business_id found in localStorage');
+        console.error('No business_id found in token');
     }
     // Also ensure rating and date range dropdowns are always populated
     populateRatingAndDateDropdowns();
@@ -270,7 +268,6 @@ populateStaffFilter();
 
 // Test staff API endpoint
 function testStaffAPI() {
-    const business_id = localStorage.getItem('business_id');
     if (business_id) {
         fetch(`/api/business-manage/staff?business_id=${business_id}`)
             .then(res => {
@@ -289,7 +286,6 @@ testStaffAPI();
 
 // Test the new debug endpoint
 function testDebugAPI() {
-    const business_id = localStorage.getItem('business_id');
     if (business_id) {
         fetch(`/api/business-manage/test-staff?business_id=${business_id}`)
             .then(res => {

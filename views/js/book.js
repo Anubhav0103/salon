@@ -1,9 +1,19 @@
-// Set minimum date to today
+const token = localStorage.getItem('token');
+let user = null;
+if (!token) {
+    window.location.href = '/user-login';
+} else {
+    try { user = jwt_decode(token); } catch (e) {}
+    if (!user || !user.email) {
+        window.location.href = '/user-login';
+    }
+}
+
+
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('bookingDate').min = today;
 
-// Check if user is logged in and show/hide logout button
-const user = localStorage.getItem('user');
+
 const logoutBtn = document.getElementById('logoutBtn');
 if (user) {
     logoutBtn.style.display = 'block';
@@ -11,7 +21,7 @@ if (user) {
     logoutBtn.style.display = 'none';
 }
 
-// Fetch available services and populate the select (from service_catalog)
+
 fetch('/api/business-manage/services-catalog')
     .then(res => res.json())
     .then(data => {
@@ -43,7 +53,7 @@ document.getElementById('useGeolocation').onclick = function() {
     }
 };
 
-// Function to get day name from date
+
 function getDayName(dateString) {
     const date = new Date(dateString);
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -156,8 +166,6 @@ function openBookingModal(businessId, serviceId, bookingDate, servicePrice) {
     }
     priceDiv.innerHTML = servicePrice ? `<strong>Price:</strong> ₹${parseFloat(servicePrice).toFixed(2)}` : '';
     // Pre-fill user info from login (if available)
-    let user = null;
-    try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
     if (user) {
         document.getElementById('modalUserName').value = user.name || '';
         document.getElementById('modalUserEmail').value = user.email || '';
@@ -233,9 +241,7 @@ bookingForm.onsubmit = function(e) {
         booking_date: form.booking_date.value,
         booking_time: form.booking_time.value
     };
-    // Get user info from localStorage if available
-    let user = null;
-    try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+    // Get user info from decoded token if available
     if (user) {
         bookingData.user_name = user.name || '';
         bookingData.user_email = user.email || '';
@@ -318,9 +324,7 @@ bookingForm.onsubmit = function(e) {
 // Logout functionality
 document.getElementById('logoutBtn').addEventListener('click', function() {
     // Clear user data from localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('user_token');
+    localStorage.removeItem('token');
     
     // Redirect to login page
     window.location.href = '/user-login';

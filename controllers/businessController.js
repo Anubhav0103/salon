@@ -74,7 +74,16 @@ function login(req, res) {
             if (!isMatch) return res.status(401).json({ error: 'Invalid email or password' });
             const jwt = require('jsonwebtoken');
             const JWT_SECRET = process.env.JWT_SECRET;
-            const token = jwt.sign({ businessId: business.business_id }, JWT_SECRET, { expiresIn: '24h' });
+            const payload = {
+                business_id: business.business_id,
+                salon_name: business.salon_name,
+                salon_address: business.salon_address,
+                email: business.email,
+                phone: business.phone,
+                latitude: business.latitude,
+                longitude: business.longitude
+            };
+            const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
             res.json({
                 message: 'Login successful',
                 business: {

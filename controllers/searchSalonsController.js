@@ -19,7 +19,6 @@ async function searchSalons(req, res) {
     if (!service_names || !Array.isArray(service_names) || !latitude || !longitude) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
-    // Find all businesses that offer ALL selected service names
     const placeholders = service_names.map(() => '?').join(',');
     const sql = `
         SELECT b.business_id, b.salon_name, b.salon_address, b.latitude, b.longitude

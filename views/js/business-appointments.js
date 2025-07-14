@@ -1,8 +1,6 @@
-// Get business_id from localStorage or prompt
+// Get business_id from token
+const business = JSON.parse(localStorage.getItem('business'));
 const business_id = localStorage.getItem('business_id');
-if (!business_id) {
-    alert('No business_id found. Please log in as a business.');
-}
 
 function fetchAppointments() {
     fetch(`/api/business-manage/appointments?business_id=${business_id}`)

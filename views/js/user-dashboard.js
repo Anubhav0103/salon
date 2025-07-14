@@ -1,9 +1,15 @@
-// Get user from localStorage
+// Get user from token
+const token = localStorage.getItem('token');
 let user = null;
-try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
-if (!user || !user.email) {
+if (!token) {
     alert('Please log in to view your bookings.');
     window.location.href = '/user-login';
+} else {
+    try { user = jwt_decode(token); } catch (e) {}
+    if (!user || !user.email) {
+        alert('Please log in to view your bookings.');
+        window.location.href = '/user-login';
+    }
 }
 
 function fetchUserBookings() {
