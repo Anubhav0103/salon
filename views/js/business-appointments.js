@@ -1,26 +1,56 @@
-// Get business_id from token
-const business = JSON.parse(localStorage.getItem('business'));
-const business_id = localStorage.getItem('business_id');
+document.addEventListener('DOMContentLoaded', function() {
+    // ✅ FIX: Get the token from localStorage.
+    const token = localStorage.getItem('token');
 
-function fetchAppointments() {
-    fetch(`/api/business-manage/appointments?business_id=${business_id}`)
+    // ✅ FIX: Check for token and decode it to get business info.
+    if (!token) {
+        alert("Authentication error. Please log in again.");
+        window.location.href = '/business-login';
+        return;
+    }
+    
+    let businessInfo;
+    try {
+        businessInfo = jwt_decode(token);
+    } catch (error) {
+        alert("Session is invalid or expired. Please log in again.");
+        window.location.href = '/business-login';
+        return;
+    }
+    
+    const business_id = businessInfo.business_id;
+    // --- End of new authentication logic ---
+
+    const logoutButton = document.querySelector('.logout-btn');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = '/business-login';
+        });
+    }
+
+    function fetchAppointments() {
+        fetch(`/api/business-manage/appointments?business_id=${business_id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
         .then(res => res.json())
         .then(data => {
             const tbody = document.getElementById('appointmentsBody');
             tbody.innerHTML = '';
             (data.appointments || []).forEach(app => {
                 const row = document.createElement('tr');
-                let staffCell = '';
+                let staffCell = app.staff_id ? `ID: ${app.staff_id}` : '<i>Unassigned</i>';
                 let actionCell = '';
+
                 if (app.status !== 'completed') {
-                    staffCell = app.staff_id || '';
-                    actionCell = `<button onclick="completeAppointment(${app.booking_id}, this)">✔️ Complete</button> ` +
-                        `<button onclick="showReassignModal(${app.booking_id}, '${app.service_name.replace(/'/g, "\'")}', ${app.staff_id || 'null'})">🔄 Reassign</button>`;
+                    actionCell = `
+                        <button class="action-btn complete-btn" data-booking-id="${app.booking_id}">✔️ Complete</button>
+                        <button class="action-btn reassign-btn" data-booking-id="${app.booking_id}">🔄 Reassign</button>
+                    `;
                 } else {
-                    staffCell = app.staff_id || '';
-                    actionCell = '-';
+                    actionCell = '✅ Completed';
                 }
-                // Format date to YYYY-MM-DD
+
                 const bookingDate = app.booking_date ? app.booking_date.split('T')[0] : '';
                 row.innerHTML = `
                     <td>${app.user_name}</td>
@@ -28,94 +58,97 @@ function fetchAppointments() {
                     <td>${staffCell}</td>
                     <td>${bookingDate}</td>
                     <td>${app.booking_time}</td>
-                    <td>${app.status}</td>
-                    <td>${app.payment_id || ''}</td>
+                    <td><span class="status ${app.status}">${app.status}</span></td>
+                    <td>${app.payment_id || 'N/A'}</td>
                     <td>${actionCell}</td>
                 `;
                 tbody.appendChild(row);
             });
         });
-}
+    }
 
-window.completeAppointment = function(booking_id, btn) {
-    fetch(`/api/business-manage/appointments/${booking_id}/complete`, {
-        method: 'POST'
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.message) {
-            // Remove row from table
-            btn.closest('tr').remove();
-        } else {
-            alert(data.error || 'Error updating appointment');
+    function completeAppointment(booking_id) {
+        if (!confirm('Mark this appointment as complete? A review link will be sent.')) return;
+        fetch(`/api/business-manage/appointments/${booking_id}/complete`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            alert(data.message);
+            fetchAppointments();
+        })
+        .catch(err => alert("Error completing appointment: " + err.message));
+    }
+
+    document.getElementById('appointmentsBody').addEventListener('click', function(e) {
+        if (e.target.classList.contains('complete-btn')) {
+            completeAppointment(e.target.dataset.bookingId);
+        }
+        if (e.target.classList.contains('reassign-btn')) {
+            showReassignModal(e.target.dataset.bookingId);
         }
     });
-};
 
-window.showReassignModal = function(booking_id, service_name, current_staff_id) {
-    // Create modal
-    let modal = document.getElementById('reassignModal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'reassignModal';
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100vw';
-        modal.style.height = '100vh';
-        modal.style.background = 'rgba(0,0,0,0.4)';
-        modal.style.display = 'flex';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
-        modal.style.zIndex = '1000';
-        document.body.appendChild(modal);
-    }
-    modal.innerHTML = `<div style="background:#fff;padding:2em;border-radius:8px;min-width:350px;max-width:95vw;">
-        <h3>Reassign Appointment</h3>
-        <div id="eligibleStaffContainer">Loading staff...</div>
-        <div style="margin-top:1em;text-align:right;">
-            <button onclick="document.getElementById('reassignModal').remove()">Cancel</button>
-        </div>
-    </div>`;
-    // Fetch eligible staff
-    fetch(`/api/business-manage/eligible-staff-for-appointment?appointment_id=${booking_id}`)
+    window.showReassignModal = function(booking_id) {
+        let modal = document.getElementById('reassignModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'reassignModal';
+            document.body.appendChild(modal);
+        }
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Reassign Appointment</h3>
+                <div id="eligibleStaffContainer">Loading available staff...</div>
+                <div class="modal-actions">
+                    <button class="cancel-btn">Cancel</button>
+                </div>
+            </div>`;
+        
+        modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+        
+        fetch(`/api/business-manage/eligible-staff-for-appointment?appointment_id=${booking_id}`, {
+             headers: { 'Authorization': `Bearer ${token}` }
+        })
         .then(res => res.json())
         .then(data => {
             const container = document.getElementById('eligibleStaffContainer');
-            if (!data.staff || data.staff.length === 0) {
-                container.innerHTML = '<div>No eligible staff found for this service.</div>';
+            if (data.error || !data.staff || data.staff.length === 0) {
+                container.innerHTML = '<p>No other staff members are available for this slot.</p>';
                 return;
             }
-            let html = `<select id='eligibleStaffSelect' style='width:100%;font-size:1.1em;padding:0.5em;'>`;
-            data.staff.forEach(staff => {
-                html += `<option value='${staff.staff_id}' ${staff.staff_id == current_staff_id ? 'selected' : ''}>${staff.name || 'Staff ' + staff.staff_id}</option>`;
-            });
-            html += `</select>`;
-            html += `<button id='confirmReassignBtn' style='margin-left:1em;margin-top:1em;'>Confirm Reassignment</button>`;
-            container.innerHTML = html;
-            document.getElementById('confirmReassignBtn').onclick = function() {
-                window.reassignAppointment(booking_id);
-            };
+            container.innerHTML = `
+                <select id='eligibleStaffSelect'>
+                    ${data.staff.map(staff => `<option value='${staff.staff_id}'>${staff.name}</option>`).join('')}
+                </select>
+                <button id='confirmReassignBtn' class="action-btn">Confirm</button>
+            `;
+            document.getElementById('confirmReassignBtn').onclick = () => reassignAppointment(booking_id);
         });
-};
+    };
 
-window.reassignAppointment = function(booking_id) {
-    const select = document.getElementById('eligibleStaffSelect');
-    const staff_id = select.value;
-    fetch(`/api/business-manage/reassign-appointment/${booking_id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ staff_id })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.message) {
+    window.reassignAppointment = function(booking_id) {
+        const staff_id = document.getElementById('eligibleStaffSelect').value;
+        fetch(`/api/business-manage/reassign-appointment/${booking_id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ staff_id })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            alert(data.message);
             document.getElementById('reassignModal').remove();
             fetchAppointments();
-        } else {
-            alert(data.error || 'Error reassigning appointment');
-        }
-    });
-};
+        })
+        .catch(err => alert("Error reassigning: " + err.message));
+    };
 
-fetchAppointments(); 
+    fetchAppointments();
+});

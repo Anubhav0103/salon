@@ -1,5 +1,6 @@
 const Business = require('../models/Business');
 const fetch = require('node-fetch');
+const { createAppError } = require('../middleware/errorHandler');
 
 async function geocodeAddress(address) {
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
@@ -14,10 +15,10 @@ async function geocodeAddress(address) {
     return { latitude: null, longitude: null };
 }
 
-async function register(req, res) {
+async function register(req, res, next) {
     const { salon_name, salon_address, email, phone, password } = req.body;
     if (!salon_name || !salon_address || !email || !phone || !password) {
-        return res.status(400).json({ error: 'All fields are required' });
+        return next(createAppError('All fields are required', 400));
     }
     if (password.length < 6) {
         return res.status(400).json({ error: 'Password must be at least 6 characters' });
@@ -25,25 +26,29 @@ async function register(req, res) {
     Business.findByEmail(email, async (err, existingBusiness) => {
         if (err) return res.status(500).json({ error: 'Database error' });
         if (existingBusiness) return res.status(400).json({ error: 'Email already registered' });
-        // Geocode address
+
         let coords = await geocodeAddress(salon_address);
         Business.create({ salon_name, salon_address, email, phone, password, latitude: coords.latitude, longitude: coords.longitude }, (err, business) => {
             if (err) return res.status(500).json({ error: 'Error creating business' });
+
+            const jwt = require('jsonwebtoken');
+            const JWT_SECRET = process.env.JWT_SECRET;
+            const payload = {
+                business_id: business.business_id,
+                salon_name: business.salon_name,
+                email: business.email,
+                role: 'business'
+            };
+            const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+
             res.status(201).json({
                 message: 'Business registered successfully',
-                business: {
-                    business_id: business.business_id,
-                    salon_name: business.salon_name,
-                    salon_address: business.salon_address,
-                    email: business.email,
-                    phone: business.phone,
-                    latitude: coords.latitude,
-                    longitude: coords.longitude
-                }
+                token
             });
         });
     });
 }
+
 
 function getAllBusinesses(req, res) {
     Business.getAll((err, businesses) => {
@@ -66,40 +71,33 @@ function login(req, res) {
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required' });
     }
+
     Business.findByEmail(email, (err, business) => {
         if (err) return res.status(500).json({ error: 'Database error' });
         if (!business) return res.status(401).json({ error: 'Invalid email or password' });
+
         Business.verifyPassword(password, business.password, (err, isMatch) => {
             if (err) return res.status(500).json({ error: 'Error verifying password' });
             if (!isMatch) return res.status(401).json({ error: 'Invalid email or password' });
+
             const jwt = require('jsonwebtoken');
             const JWT_SECRET = process.env.JWT_SECRET;
             const payload = {
                 business_id: business.business_id,
                 salon_name: business.salon_name,
-                salon_address: business.salon_address,
                 email: business.email,
-                phone: business.phone,
-                latitude: business.latitude,
-                longitude: business.longitude
+                role: 'business'
             };
             const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
-            res.json({
+
+            res.status(200).json({
                 message: 'Login successful',
-                business: {
-                    business_id: business.business_id,
-                    salon_name: business.salon_name,
-                    salon_address: business.salon_address,
-                    email: business.email,
-                    phone: business.phone,
-                    latitude: business.latitude,
-                    longitude: business.longitude
-                },
                 token
             });
         });
     });
 }
+
 
 async function updateBusiness(req, res) {
     const businessId = req.params.id;
@@ -128,4 +126,4 @@ module.exports = {
     getBusinessById,
     login,
     updateBusiness
-}; 
+};

@@ -1,36 +1,67 @@
-// Get user from token
-const token = localStorage.getItem('token');
-let user = null;
-if (!token) {
-    alert('Please log in to view your bookings.');
-    window.location.href = '/user-login';
-} else {
-    try { user = jwt_decode(token); } catch (e) {}
-    if (!user || !user.email) {
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Authentication Check ---
+    const token = localStorage.getItem('token');
+    let user = null;
+
+    if (!token) {
         alert('Please log in to view your bookings.');
         window.location.href = '/user-login';
+        return; // Stop execution
     }
-}
 
-function fetchUserBookings() {
-    fetch(`/api/users/bookings?user_email=${encodeURIComponent(user.email)}`)
-        .then(res => res.json())
+    try {
+        user = jwt_decode(token);
+        if (user.role !== 'user') throw new Error("Not a user");
+    } catch (e) {
+        alert('Your session is invalid. Please log in again.');
+        localStorage.removeItem('token');
+        window.location.href = '/user-login';
+        return; // Stop execution
+    }
+    // --- End Authentication Check ---
+
+    // --- Event Listeners ---
+    const logoutLink = document.getElementById('logoutLink');
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent the link from navigating immediately
+            localStorage.removeItem('token');
+            window.location.href = '/user-login';
+        });
+    }
+
+    // --- Core Function ---
+    function fetchUserBookings() {
+        // This fetch call is now secure and uses the user_id from the token
+        fetch(`/api/users/bookings`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => {
+            if (!res.ok) return res.json().then(err => Promise.reject(err.error));
+            return res.json();
+        })
         .then(data => {
             const tbody = document.getElementById('userBookingsBody');
             tbody.innerHTML = '';
+            
+            if (!data.bookings || data.bookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">You have no past or upcoming bookings.</td></tr>';
+                return;
+            }
+
             // Sort bookings by date and time, newest first
-            const bookings = (data.bookings || []).slice().sort((a, b) => {
-                const dateA = new Date(a.booking_date + 'T' + a.booking_time);
-                const dateB = new Date(b.booking_date + 'T' + b.booking_time);
+            const bookings = data.bookings.sort((a, b) => {
+                const dateA = new Date(`${a.booking_date.split('T')[0]}T${a.booking_time}`);
+                const dateB = new Date(`${b.booking_date.split('T')[0]}T${b.booking_time}`);
                 return dateB - dateA;
             });
+
             bookings.forEach(b => {
-                // Format date and time
-                const dateStr = b.booking_date ? new Date(b.booking_date).toISOString().split('T')[0] : '';
-                const timeStr = b.booking_time ? b.booking_time.slice(0,5) : '';
+                const dateStr = new Date(b.booking_date).toLocaleDateString();
+                const timeStr = b.booking_time ? b.booking_time.slice(0, 5) : '';
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${b.business_id || ''}</td>
+                    <td>Salon ID: ${b.business_id || ''}</td>
                     <td>${b.service_name}</td>
                     <td>${dateStr}</td>
                     <td>${timeStr}</td>
@@ -39,7 +70,12 @@ function fetchUserBookings() {
                 `;
                 tbody.appendChild(row);
             });
+        })
+        .catch(error => {
+            alert('Could not fetch bookings: ' + error);
         });
-}
+    }
 
-fetchUserBookings(); 
+    // --- Initial Page Load ---
+    fetchUserBookings();
+});

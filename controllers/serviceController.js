@@ -1,14 +1,35 @@
 const { createService, getAllServicesByBusiness, getServiceById, updateService, deleteService, getAllUniqueServices, getAllCatalogServices } = require('../models/Service');
+const { createAppError } = require('../middleware/errorHandler');
 
-function addService(req, res) {
+function addService(req, res, next) {
+    console.log("--- [SERVER LOG 1] --- Received request at /services endpoint.");
     const { business_id, name, description, duration, price } = req.body;
-    if (!business_id || !name || !duration || !price) {
-        return res.status(400).json({ error: 'Required fields missing' });
+
+    // Validation checks
+    if (!business_id || !name || duration === undefined || price === undefined) {
+        console.error("--- [SERVER LOG ERROR] --- Validation failed: Missing required fields.");
+        return res.status(400).json({ error: 'Required fields are missing: business_id, name, duration, price.' });
     }
+    if (typeof business_id !== 'number' || typeof name !== 'string' || typeof duration !== 'number' || typeof price !== 'number') {
+        console.error("--- [SERVER LOG ERROR] --- Validation failed: Invalid data types.");
+        return res.status(400).json({ error: 'Invalid data types.' });
+    }
+
+    console.log("--- [SERVER LOG 2] --- Validation passed. Data is correct. Calling createService in the model...");
+    
+    // Call the model function
     createService({ business_id, name, description, duration, price }, (err, service) => {
-        if (err) return res.status(500).json({ error: 'Error adding service' });
-        res.status(201).json({ message: 'Service added', service });
+        console.log("--- [SERVER LOG 4] --- Callback from createService has been executed.");
+        if (err) {
+            console.error("--- [SERVER LOG 5 - ERROR] --- The model returned an error:", err);
+            return res.status(500).json({ error: 'Database error while creating service.' });
+        }
+        
+        console.log("--- [SERVER LOG 6 - SUCCESS] --- Service created. Sending success response.");
+        res.status(201).json({ message: 'Service added successfully', service });
     });
+    
+    console.log("--- [SERVER LOG 3] --- Waiting for createService callback to finish.");
 }
 
 function listServices(req, res) {
@@ -71,4 +92,4 @@ module.exports = {
     removeService,
     listAllUniqueServices,
     listCatalogServices
-}; 
+};

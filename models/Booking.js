@@ -1,17 +1,26 @@
 const db = require('../config/database');
 
+// In models/Booking.js...
+
 function createBooking(bookingData, callback) {
     const {
+        // ✅ FIX: Add user_id here
+        user_id,
         business_id, staff_id, user_name, user_email, user_phone,
         service_id, service_name, service_duration, service_price,
         booking_date, booking_time, status, payment_id, payment_status
     } = bookingData;
+
+    // ✅ FIX: Add user_id to the INSERT statement fields
     const sql = `INSERT INTO bookings (
-        business_id, staff_id, user_name, user_email, user_phone,
+        user_id, business_id, staff_id, user_name, user_email, user_phone,
         service_id, service_name, service_duration, service_price,
         booking_date, booking_time, status, payment_id, payment_status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    
     db.query(sql, [
+        // ✅ FIX: Add user_id to the values array in the correct position
+        user_id,
         business_id, staff_id, user_name, user_email, user_phone,
         service_id, service_name, service_duration, service_price,
         booking_date, booking_time, status, payment_id, payment_status

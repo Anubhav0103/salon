@@ -8,23 +8,33 @@
 <body>
     <nav>
         <a href="/book">Book a Service</a>
-        <a href="/user-login" onclick="localStorage.removeItem('user');">Logout</a>
+        <!-- ✅ FIX: Using an ID for the logout link and removing the broken onclick -->
+        <a href="#" id="logoutLink" style="float: right;">Logout</a>
     </nav>
-    <h1>My Bookings</h1>
-    <table border="1" id="userBookingsTable">
-        <thead>
-            <tr>
-                <th>Salon</th>
-                <th>Service</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Payment</th>
-            </tr>
-        </thead>
-        <tbody id="userBookingsBody"></tbody>
-    </table>
+    <div class="container">
+        <h1>My Bookings</h1>
+        <table border="1" id="userBookingsTable">
+            <thead>
+                <tr>
+                    <th>Salon</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+            <tbody id="userBookingsBody">
+                <!-- Bookings will be loaded here by JavaScript -->
+                <tr>
+                    <td colspan="6" style="text-align:center;">Loading your bookings...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- These script tags are required -->
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
     <script src="/views/js/user-dashboard.js"></script>
 </body>
-</html> 
+</html>

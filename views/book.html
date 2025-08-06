@@ -47,37 +47,44 @@
     <h2>Available Salons</h2>
     <div id="salonResults"></div>
     
-    <div id="bookingModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-        <div style="background:#fff; padding:24px; border-radius:8px; max-width:400px; margin:auto; position:relative;">
-            <button id="closeBookingModal" style="position:absolute; top:8px; right:8px;">&times;</button>
-            <h3>Book Appointment</h3>
-            <form id="bookingForm">
-                <input type="hidden" id="modalBusinessId" name="business_id">
-                <input type="hidden" id="modalServiceId" name="service_id">
-                <input type="hidden" id="modalBookingDate" name="booking_date">
-                <div>
-                    <label for="modalTimeSlot">Select Time Slot:</label>
-                    <select id="modalTimeSlot" name="booking_time" required>
-                        <option value="">-- Select a time --</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="modalUserName">Your Name:</label>
-                    <input type="text" id="modalUserName" name="user_name" required>
-                </div>
-                <div>
-                    <label for="modalUserEmail">Email:</label>
-                    <input type="email" id="modalUserEmail" name="user_email">
-                </div>
-                <div>
-                    <label for="modalUserPhone">Phone:</label>
-                    <input type="tel" id="modalUserPhone" name="user_phone">
-                </div>
-                <button type="submit">Confirm Booking</button>
-            </form>
-            <div id="bookingFeedback"></div>
-        </div>
+    <!-- Find this section in your book.html file -->
+<div id="bookingModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div style="background:#fff; padding:24px; border-radius:8px; max-width:400px; margin:auto; position:relative;">
+        <button id="closeBookingModal" style="position:absolute; top:8px; right:8px;">&times;</button>
+        <h3>Book Appointment</h3>
+
+        <!-- ✅ FIX: Add these two elements to display the service info -->
+        <h4 id="modalServiceName" style="text-align:center; margin: 10px 0; color: #333;"></h4>
+        <p id="modalServicePrice" style="text-align:center; margin-bottom: 20px; font-weight: bold;"></p>
+
+        <form id="bookingForm">
+            <input type="hidden" id="modalBusinessId" name="business_id">
+            <input type="hidden" id="modalServiceId" name="service_id">
+            <input type="hidden" id="modalBookingDate" name="booking_date">
+            <div>
+                <label for="modalTimeSlot">Select Time Slot:</label>
+                <select id="modalTimeSlot" name="booking_time" required>
+                    <option value="">-- Select a time --</option>
+                </select>
+            </div>
+            <!-- These next fields are pre-filled by the script, so they can be hidden -->
+            <div style="display:none;">
+                <label for="modalUserName">Your Name:</label>
+                <input type="text" id="modalUserName" name="user_name" required readonly>
+            </div>
+            <div style="display:none;">
+                <label for="modalUserEmail">Email:</label>
+                <input type="email" id="modalUserEmail" name="user_email" readonly>
+            </div>
+            <div style="display:none;">
+                <label for="modalUserPhone">Phone:</label>
+                <input type="tel" id="modalUserPhone" name="user_phone" readonly>
+            </div>
+            <button type="submit">Proceed to Payment</button>
+        </form>
+        <div id="bookingFeedback"></div>
     </div>
+</div>
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>

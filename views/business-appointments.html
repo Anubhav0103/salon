@@ -16,7 +16,8 @@
                 <a href="/business-staff" class="nav-link">Manage Staff</a>
                 <a href="/business-appointments" class="nav-link active">Manage Appointments</a>
                 <a href="/business-ratings" class="nav-link">Staff Ratings</a>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+                <!-- FIX: Added a clean logout button with a class -->
+                <button class="logout-btn">Logout</button>
             </div>
         </div>
     </nav>
@@ -38,12 +39,9 @@
             <tbody id="appointmentsBody"></tbody>
         </table>
     </div>
+    <!-- FIX: We only need to link to the main JS file. The inline scripts were removed. -->
+    <script src="/views/js/auth-helper.js"></script>
     <script src="/views/js/business-appointments.js"></script>
-    <script>
-        function logout() {
-            localStorage.removeItem('token');
-            window.location.href = '/';
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 </body>
-</html> 
+</html>

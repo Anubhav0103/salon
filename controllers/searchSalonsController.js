@@ -1,6 +1,7 @@
 const db = require('../config/database');
 const { getServiceDurationAndPrice } = require('../models/Service');
 const { getStaffByBusinessAndService, getBookingsForStaffOnDate } = require('../models/Staff');
+const { createAppError } = require('../middleware/errorHandler');
 
 function haversine(lat1, lon1, lat2, lon2) {
     function toRad(x) { return x * Math.PI / 180; }
@@ -14,10 +15,10 @@ function haversine(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
-async function searchSalons(req, res) {
+async function searchSalons(req, res, next) {
     const { service_names, latitude, longitude } = req.body;
     if (!service_names || !Array.isArray(service_names) || !latitude || !longitude) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return next(createAppError('Missing required fields', 400));
     }
     const placeholders = service_names.map(() => '?').join(',');
     const sql = `
@@ -152,4 +153,4 @@ async function getAvailableSlots(req, res) {
     });
 }
 
-module.exports = { searchSalons, searchSalonsWithDate, getAvailableSlots }; 
+module.exports = { searchSalons, searchSalonsWithDate, getAvailableSlots };

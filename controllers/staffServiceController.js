@@ -1,8 +1,9 @@
 const { assignServiceToStaff, unassignServiceFromStaff, getServicesByStaff, getStaffByService } = require('../models/StaffService');
+const { createAppError } = require('../middleware/errorHandler');
 
-function assignService(req, res) {
+function assignService(req, res, next) {
     const { staff_id, service_id } = req.body;
-    if (!staff_id || !service_id) return res.status(400).json({ error: 'staff_id and service_id required' });
+    if (!staff_id || !service_id) return next(createAppError('staff_id and service_id required', 400));
     assignServiceToStaff(staff_id, service_id, (err, result) => {
         if (err) return res.status(500).json({ error: 'Error assigning service' });
         res.json({ message: 'Service assigned to staff', assignment: result });
@@ -41,4 +42,4 @@ module.exports = {
     unassignService,
     listServicesForStaff,
     listStaffForService
-}; 
+};

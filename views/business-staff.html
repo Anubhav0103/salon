@@ -89,12 +89,20 @@
             <tbody id="staffList"></tbody>
         </table>
     </div>
+    <script src="/views/js/auth-helper.js"></script>
     <script src="/views/js/business-staff.js"></script>
+    <!-- Replace inline onclick handlers with event listeners -->
     <script>
-        function logout() {
-            localStorage.removeItem('token');
-            window.location.href = '/';
-        }
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+          localStorage.removeItem('business_token');
+          localStorage.removeItem('business_id');
+          window.location.href = '/business-login.html';
+        });
+        
+        // For edit/delete buttons, they should be handled in business-staff.js
+      });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 </body>
-</html> 
+</html>

@@ -26,9 +26,9 @@ document.getElementById('businessLoginForm').addEventListener('submit', async fu
         const data = await response.json();
         if (response.ok) {
             showMessage(data.message, 'success');
+            const decoded = jwt_decode(data.token);
             localStorage.setItem('token', data.token);
-            localStorage.setItem('business', JSON.stringify(data.business));
-            localStorage.setItem('business_id', data.business.business_id);
+
             setTimeout(() => {
                 window.location.href = '/business-staff';
             }, 2000);

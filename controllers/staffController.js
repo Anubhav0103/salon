@@ -1,10 +1,12 @@
 const { createStaff, getAllStaffByBusiness, getStaffById, updateStaff, deleteStaff } = require('../models/Staff');
 const { assignServiceToStaff, removeAllServicesForStaff, getServiceIdByName } = require('../models/StaffService');
+const { createAppError } = require('../middleware/errorHandler');
 
-function addStaff(req, res) {
+// ... (addStaff, listStaff, getStaff functions remain the same) ...
+function addStaff(req, res, next) {
     const { business_id, name, email, phone, role, specializations, working_days, working_hours_start, working_hours_end } = req.body;
     if (!business_id || !name || !role || !working_days || !working_hours_start || !working_hours_end) {
-        return res.status(400).json({ error: 'Required fields missing' });
+        return next(createAppError('Required fields missing', 400));
     }
     createStaff({ business_id, name, email, phone, role, specializations, working_days, working_hours_start, working_hours_end }, async (err, staff) => {
         if (err) return res.status(500).json({ error: 'Error adding staff' });
@@ -38,40 +40,50 @@ function getStaff(req, res) {
     });
 }
 
+
+// FIXED editStaff function
 function editStaff(req, res) {
     const { id } = req.params;
-    const { name, email, phone, role, specializations, working_days, working_hours_start, working_hours_end } = req.body;
-    updateStaff(id, { name, email, phone, role, specializations, working_days, working_hours_start, working_hours_end }, async (err, updated) => {
+    // FIX: Grab business_id directly from the request body.
+    const { business_id, name, email, phone, role, specializations, working_days, working_hours_start, working_hours_end } = req.body;
+
+    // Pass all fields except business_id to updateStaff model function.
+    const staffData = { name, email, phone, role, specializations, working_days, working_hours_start, working_hours_end };
+
+    updateStaff(id, staffData, async (err, updated) => {
         if (err) return res.status(500).json({ error: 'Error updating staff' });
+
         // Update staff_services table
-        await removeAllServicesForStaff(id);
+        await removeAllServicesForStaff(id); // Clear old assignments
+
         if (specializations) {
-            const business_id = updated.business_id;
             const serviceNames = specializations.split(',').map(s => s.trim()).filter(Boolean);
             for (const name of serviceNames) {
+                // FIX: Use the business_id captured from the request body.
                 const serviceId = await getServiceIdByName(business_id, name);
-                if (serviceId) await assignServiceToStaff(id, serviceId);
+                if (serviceId) {
+                    await assignServiceToStaff(id, serviceId);
+                } else {
+                    console.warn(`Service with name "${name}" not found for business ${business_id}`);
+                }
             }
         }
         res.json({ message: 'Staff updated', staff: updated });
     });
 }
 
+// SIMPLIFIED removeStaff function
 function removeStaff(req, res) {
     const { id } = req.params;
-    removeAllServicesForStaff(id, (err) => {
+    // The deleteStaff model already handles removing assignments from staff_services.
+    // No need to call removeAllServicesForStaff here.
+    deleteStaff(id, (err, result) => {
         if (err) {
-            console.error('Error removing staff services:', err);
-            return res.status(500).json({ error: 'Error deleting staff services: ' + err.message });
+            console.error('Error deleting staff:', err);
+            // Provide a more detailed error message to the frontend.
+            return res.status(500).json({ error: 'Error deleting staff: ' + err.message });
         }
-        deleteStaff(id, (err, result) => {
-            if (err) {
-                console.error('Error deleting staff:', err);
-                // Provide more detailed error message
-                return res.status(500).json({ error: 'Error deleting staff: ' + err.message });
-            }
-            res.json({ message: 'Staff deleted successfully' });
-        });
+        res.json({ message: 'Staff deleted successfully' });
     });
 }
 
@@ -81,4 +93,4 @@ module.exports = {
     getStaff,
     editStaff,
     removeStaff
-}; 
+};

@@ -5,15 +5,16 @@ const db = require('../config/database');
 const { sendMail } = require('../utils/mailjet');
 const crypto = require('crypto');
 const { getBookingDetailsById } = require('../models/Booking');
+const { createAppError } = require('../middleware/errorHandler');
 
-function addBooking(req, res) {
-    const { business_id, service_id, booking_date, booking_time, user_name, user_email, user_phone, payment_id, payment_status } = req.body;
+function addBooking(req, res, next) {
+    const { user_id, business_id, service_id, booking_date, booking_time, user_name, user_email, user_phone, payment_id, payment_status } = req.body;
     if (!business_id || !service_id || !booking_date || !booking_time || !user_name) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return next(createAppError('Missing required fields', 400));
     }
     // Fetch service details for name, duration, price
     getServiceById(service_id, (err, service) => {
-        if (err || !service) return res.status(400).json({ error: 'Service not found' });
+        if (err || !service) return next(createAppError('Service not found', 400));
         // Find available staff for this service, date, and time
         getStaffByBusinessAndService(business_id, service_id, async (err, staffList) => {
             if (err || !staffList || staffList.length === 0) return res.status(400).json({ error: 'No staff available for this service' });
@@ -53,6 +54,7 @@ function addBooking(req, res) {
             }
             // Create booking with assigned staff
             const bookingData = {
+                user_id,
                 business_id,
                 staff_id: assignedStaffId,
                 user_name,
@@ -94,8 +96,9 @@ function addBooking(req, res) {
     });
 }
 
-function listAppointments(req, res) {
+function listAppointments(req, res, next) {
     const business_id = req.query.business_id;
+    if (!business_id) return next(createAppError('business_id required', 400));
     const status = req.query.status;
     if (!business_id) return res.status(400).json({ error: 'business_id required' });
     let sql = 'SELECT * FROM bookings WHERE business_id = ?';
@@ -115,9 +118,9 @@ function listAppointments(req, res) {
     });
 }
 
-function completeAppointment(req, res) {
+function completeAppointment(req, res, next) {
     const booking_id = req.params.id;
-    if (!booking_id) return res.status(400).json({ error: 'booking_id required' });
+    if (!booking_id) return next(createAppError('booking_id required', 400));
     
     db.query('UPDATE bookings SET status = ? WHERE booking_id = ?', ['completed', booking_id], (err, result) => {
         if (err) {
@@ -168,20 +171,27 @@ function completeAppointment(req, res) {
     });
 }
 
-function listUserBookings(req, res) {
-    const user_email = req.query.user_email;
-    if (!user_email) return res.status(400).json({ error: 'user_email required' });
-    const sql = 'SELECT * FROM bookings WHERE user_email = ? ORDER BY booking_date DESC, booking_time DESC';
-    db.query(sql, [user_email], (err, rows) => {
-        if (err) return res.status(500).json({ error: 'Error fetching user bookings' });
+function listUserBookings(req, res, next) {
+    // ✅ FIX: Get the user's ID securely from the token, not from the 
+    const userId = req.user.user_id;
+
+    if (!userId) {
+        return next(createAppError('User ID not found in token.', 401));
+    }
+
+    // ✅ FIX: Query by user_id instead of user_email.
+    const sql = 'SELECT * FROM bookings WHERE user_id = ? ORDER BY booking_date DESC, booking_time DESC';
+    
+    db.query(sql, [userId], (err, rows) => {
+        if (err) return next(createAppError('Error fetching user bookings', 500));
         res.json({ bookings: rows });
     });
 }
 
 // GET /api/business-manage/eligible-staff-for-appointment?appointment_id=...
-function getEligibleStaffForAppointment(req, res) {
+function getEligibleStaffForAppointment(req, res, next) {
     const { appointment_id } = req.query;
-    if (!appointment_id) return res.status(400).json({ error: 'appointment_id required' });
+    if (!appointment_id) return next(createAppError('appointment_id required', 400));
     // Get the service, business, date, and time for this appointment
     db.query('SELECT service_name, business_id, booking_date, booking_time FROM bookings WHERE booking_id = ?', [appointment_id], (err, rows) => {
         if (err || !rows.length) return res.status(404).json({ error: 'Appointment not found' });
@@ -242,4 +252,4 @@ module.exports = {
   listUserBookings,
   getEligibleStaffForAppointment,
   reassignAppointment
-}; 
+};

@@ -1,11 +1,21 @@
 const db = require('../config/database');
 
 function createService(serviceData, callback) {
+    console.log("--- [MODEL LOG 1] --- createService function has been called.");
     const { business_id, name, description, duration, price } = serviceData;
     const sql = `INSERT INTO services (business_id, name, description, duration, price) VALUES (?, ?, ?, ?, ?)`;
+    
+    console.log("--- [MODEL LOG 2] --- About to execute SQL query:", sql);
+    
     db.query(sql, [business_id, name, description, duration, price], (err, result) => {
-        if (err) return callback(err);
-        callback(null, { service_id: result.insertId, business_id, name, description, duration, price });
+        console.log("--- [MODEL LOG 3] --- The database has responded to the query.");
+        if (err) {
+            console.error("--- [MODEL LOG 4 - DB ERROR] ---", err);
+            return callback(err);
+        }
+        
+        console.log("--- [MODEL LOG 5 - DB SUCCESS] --- Query successful.");
+        callback(null, { service_id: result.insertId, ...serviceData });
     });
 }
 

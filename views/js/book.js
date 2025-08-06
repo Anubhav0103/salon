@@ -1,331 +1,238 @@
-const token = localStorage.getItem('token');
-let user = null;
-if (!token) {
-    window.location.href = '/user-login';
-} else {
-    try { user = jwt_decode(token); } catch (e) {}
-    if (!user || !user.email) {
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Authentication Check ---
+    const token = localStorage.getItem('token');
+    let user = null;
+
+    if (!token) {
         window.location.href = '/user-login';
+        return; // Stop script execution if not logged in
     }
-}
 
-
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('bookingDate').min = today;
-
-
-const logoutBtn = document.getElementById('logoutBtn');
-if (user) {
-    logoutBtn.style.display = 'block';
-} else {
-    logoutBtn.style.display = 'none';
-}
-
-
-fetch('/api/business-manage/services-catalog')
-    .then(res => res.json())
-    .then(data => {
-        const select = document.getElementById('serviceSelect');
-        select.innerHTML = '';
-        (data.services || []).forEach(service => {
-            const opt = document.createElement('option');
-            opt.value = service.name;
-            opt.textContent = service.name;
-            select.appendChild(opt);
-        });
-    });
-
-let userCoords = null;
-
-document.getElementById('useGeolocation').onclick = function() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(pos) {
-            userCoords = {
-                latitude: pos.coords.latitude,
-                longitude: pos.coords.longitude
-            };
-            document.getElementById('userAddress').value = `Lat: ${userCoords.latitude}, Lon: ${userCoords.longitude}`;
-        }, function() {
-            alert('Unable to retrieve your location');
-        });
-    } else {
-        alert('Geolocation is not supported by your browser');
+    try {
+        user = jwt_decode(token);
+        if (!user || user.role !== 'user') throw new Error("Invalid user role");
+    } catch (e) {
+        localStorage.removeItem('token');
+        window.location.href = '/user-login';
+        return; // Stop script execution
     }
-};
+    // --- End Authentication Check ---
 
-
-function getDayName(dateString) {
-    const date = new Date(dateString);
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return days[date.getDay()];
-}
-
-document.getElementById('findSalonsBtn').onclick = function() {
-    const selectedServices = Array.from(document.getElementById('serviceSelect').selectedOptions).map(opt => opt.value);
-    const address = document.getElementById('userAddress').value;
-    const bookingDate = document.getElementById('bookingDate').value;
+    // --- Element References ---
+    const bookingModal = document.getElementById('bookingModal');
+    const closeBookingModal = document.getElementById('closeBookingModal');
+    const bookingForm = document.getElementById('bookingForm');
+    const modalTimeSlot = document.getElementById('modalTimeSlot');
+    const bookingFeedback = document.getElementById('bookingFeedback');
     
-    if (!bookingDate) {
-        alert('Please select a date');
-        return;
-    }
-    
-    if (selectedServices.length === 0) {
-        alert('Please select at least one service');
-        return;
-    }
-    
-    let lat = null, lon = null;
-    if (userCoords) {
-        lat = userCoords.latitude;
-        lon = userCoords.longitude;
-    }
-    
-    // If no coords, try to geocode address
-    function doSearch(latitude, longitude) {
-        const dayName = getDayName(bookingDate);
-        
-        fetch('/api/business-manage/search-salons-with-date', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                service_names: selectedServices, 
-                latitude, 
-                longitude,
-                booking_date: bookingDate,
-                day_name: dayName
-            })
-        })
+    // --- Initial Setup ---
+    document.getElementById('bookingDate').min = new Date().toISOString().split('T')[0];
+
+    fetch('/api/business-manage/services-catalog')
         .then(res => res.json())
         .then(data => {
-            const resultsDiv = document.getElementById('salonResults');
-            resultsDiv.innerHTML = '';
-            
-            if (!data.salons || data.salons.length === 0) {
-                resultsDiv.innerHTML = '<p>No salons found for your selection on this date. No staff work on ' + dayName + '.</p>';
-                return;
-            }
-            
-            data.salons.forEach(salon => {
-                const salonDiv = document.createElement('div');
-                salonDiv.className = 'salon-item available';
-                const priceText = salon.service_price ? `<p><strong>Price:</strong> ₹${parseFloat(salon.service_price).toFixed(2)}</p>` : '';
-                salonDiv.innerHTML = `
-                    <h3>${salon.salon_name}</h3>
-                    <p><strong>Address:</strong> ${salon.salon_address}</p>
-                    <p class="distance"><strong>Distance:</strong> ${salon.distance.toFixed(2)} km</p>
-                    ${priceText}
-                    <p><strong>Status:</strong> Available on ${dayName}</p>
-                    <button onclick="bookAppointment('${salon.business_id}', '${bookingDate}', '${salon.service_price}')">Book Appointment</button>
-                `;
-                resultsDiv.appendChild(salonDiv);
+            const select = document.getElementById('serviceSelect');
+            select.innerHTML = '';
+            (data.services || []).forEach(service => {
+                select.appendChild(new Option(service.name, service.name));
             });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error searching for salons');
         });
-    }
-    
-    if (lat && lon) {
-        doSearch(lat, lon);
-    } else if (address) {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+
+    let userCoords = null;
+
+    // --- Event Handlers ---
+    document.getElementById('useGeolocation').onclick = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                userCoords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                document.getElementById('userAddress').value = `Using current location...`;
+            }, () => alert('Unable to retrieve your location.'));
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    };
+
+    document.getElementById('findSalonsBtn').onclick = function() {
+        const selectedServices = Array.from(document.getElementById('serviceSelect').selectedOptions).map(opt => opt.value);
+        const bookingDate = document.getElementById('bookingDate').value;
+        const address = document.getElementById('userAddress').value;
+
+        if (!bookingDate) return alert('Please select a date.');
+        if (selectedServices.length === 0) return alert('Please select at least one service.');
+
+        function doSearch(latitude, longitude) {
+            const date = new Date(bookingDate);
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+
+            fetch('/api/users/search-salons-with-date', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ service_names: selectedServices, latitude, longitude, booking_date: bookingDate, day_name: dayName })
+            })
             .then(res => res.json())
             .then(data => {
-                if (data && data.length > 0) {
-                    doSearch(parseFloat(data[0].lat), parseFloat(data[0].lon));
-                } else {
-                    alert('Could not geocode address');
+                const resultsDiv = document.getElementById('salonResults');
+                resultsDiv.innerHTML = '';
+                if (!data.salons || data.salons.length === 0) {
+                    return resultsDiv.innerHTML = '<p>No salons found matching your criteria for the selected date.</p>';
                 }
+                data.salons.forEach(salon => {
+                    const salonDiv = document.createElement('div');
+                    salonDiv.className = 'salon-item';
+                    salonDiv.innerHTML = `
+                        <h3>${salon.salon_name}</h3>
+                        <p>${salon.salon_address}</p>
+                        <p class="distance">${salon.distance.toFixed(2)} km away</p>
+                        <p><strong>Price:</strong> ₹${parseFloat(salon.service_price).toFixed(2)}</p>
+                        <button class="book-appointment-btn" data-business-id="${salon.business_id}" data-booking-date="${bookingDate}">View Slots & Book</button>
+                    `;
+                    resultsDiv.appendChild(salonDiv);
+                });
             });
-    } else {
-        alert('Please enter your address or use geolocation.');
-    }
-};
-
-// --- Booking Modal Logic ---
-const bookingModal = document.getElementById('bookingModal');
-const closeBookingModal = document.getElementById('closeBookingModal');
-const bookingForm = document.getElementById('bookingForm');
-const modalTimeSlot = document.getElementById('modalTimeSlot');
-const bookingFeedback = document.getElementById('bookingFeedback');
-
-function openBookingModal(businessId, serviceId, bookingDate, servicePrice) {
-    bookingModal.style.display = 'flex';
-    document.getElementById('modalBusinessId').value = businessId;
-    document.getElementById('modalServiceId').value = serviceId;
-    document.getElementById('modalBookingDate').value = bookingDate;
-    bookingFeedback.textContent = '';
-    // Show price in modal
-    let priceDiv = document.getElementById('modalServicePrice');
-    if (!priceDiv) {
-        priceDiv = document.createElement('div');
-        priceDiv.id = 'modalServicePrice';
-        bookingForm.insertBefore(priceDiv, bookingForm.firstChild);
-    }
-    priceDiv.innerHTML = servicePrice ? `<strong>Price:</strong> ₹${parseFloat(servicePrice).toFixed(2)}` : '';
-    // Pre-fill user info from login (if available)
-    if (user) {
-        document.getElementById('modalUserName').value = user.name || '';
-        document.getElementById('modalUserEmail').value = user.email || '';
-        document.getElementById('modalUserPhone').value = user.phone || '';
-        document.getElementById('modalUserName').parentElement.style.display = 'none';
-        document.getElementById('modalUserEmail').parentElement.style.display = 'none';
-        document.getElementById('modalUserPhone').parentElement.style.display = 'none';
-    } else {
-        document.getElementById('modalUserName').parentElement.style.display = '';
-        document.getElementById('modalUserEmail').parentElement.style.display = '';
-        document.getElementById('modalUserPhone').parentElement.style.display = '';
-    }
-    // Fetch available slots
-    fetch('/api/business-manage/available-slots', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ business_id: businessId, service_id: serviceId, booking_date: bookingDate })
-    })
-    .then(res => res.json())
-    .then(data => {
-        modalTimeSlot.innerHTML = '<option value="">-- Select a time --</option>';
-        (data.slots || []).forEach(slot => {
-            const opt = document.createElement('option');
-            opt.value = slot;
-            opt.textContent = slot;
-            modalTimeSlot.appendChild(opt);
-        });
-        if (!data.slots || data.slots.length === 0) {
-            const opt = document.createElement('option');
-            opt.value = '';
-            opt.textContent = 'No slots available';
-            modalTimeSlot.appendChild(opt);
         }
-    });
-}
 
-closeBookingModal.onclick = function() {
-    bookingModal.style.display = 'none';
-};
-
-window.onclick = function(event) {
-    if (event.target === bookingModal) bookingModal.style.display = 'none';
-};
-
-// --- Book Appointment Button Logic ---
-window.bookAppointment = function(businessId, bookingDate, servicePrice) {
-    // For now, only allow booking for one service at a time
-    const selectedServices = Array.from(document.getElementById('serviceSelect').selectedOptions);
-    if (selectedServices.length !== 1) {
-        alert('Please select exactly one service to book an appointment.');
-        return;
-    }
-    // Need to fetch the service_id for the selected service name
-    fetch(`/api/business-manage/services?business_id=${businessId}`)
-        .then(res => res.json())
-        .then(data => {
-            const service = (data.services || []).find(s => s.name === selectedServices[0].value);
-            if (!service) {
-                alert('Service not found for this business.');
-                return;
-            }
-            openBookingModal(businessId, service.service_id, bookingDate, servicePrice);
-        });
-};
-
-// --- Booking Form Submission ---
-bookingForm.onsubmit = function(e) {
-    e.preventDefault();
-    const form = e.target;
-    const bookingData = {
-        business_id: form.business_id.value,
-        service_id: form.service_id.value,
-        booking_date: form.booking_date.value,
-        booking_time: form.booking_time.value
-    };
-    // Get user info from decoded token if available
-    if (user) {
-        bookingData.user_name = user.name || '';
-        bookingData.user_email = user.email || '';
-        bookingData.user_phone = user.phone || '';
-    } else {
-        bookingData.user_name = form.user_name.value;
-        bookingData.user_email = form.user_email.value;
-        bookingData.user_phone = form.user_phone.value;
-    }
-    if (!bookingData.booking_time) {
-        bookingFeedback.textContent = 'Please select a time slot.';
-        return;
-    }
-    // Get price from modal
-    const priceDiv = document.getElementById('modalServicePrice');
-    let price = 0;
-    if (priceDiv && priceDiv.textContent) {
-        const match = priceDiv.textContent.match(/([\d.]+)/);
-        if (match) price = parseFloat(match[1]);
-    }
-    if (!price) {
-        bookingFeedback.textContent = 'Could not determine service price.';
-        return;
-    }
-    // 1. Create Razorpay order
-    fetch('/api/business-manage/razorpay/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: price, currency: 'INR', receipt: `receipt_${Date.now()}` })
-    })
-    .then(res => res.json())
-    .then(order => {
-        if (!order.id) {
-            bookingFeedback.textContent = 'Failed to create payment order.';
-            return;
-        }
-        // 2. Open Razorpay modal
-        const options = {
-            key: 'rzp_test_02QN3R2N4m2GAQ', // Use your Razorpay key
-            amount: order.amount,
-            currency: order.currency,
-            name: 'Salon Booking',
-            description: 'Service Payment',
-            order_id: order.id,
-            handler: function (response) {
-                console.log('Razorpay payment response:', response);
-                // 3. On payment success, create booking
-                fetch('/api/business-manage/bookings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...bookingData, payment_id: response.razorpay_payment_id, payment_status: 'paid' })
-                })
+        if (userCoords) {
+            doSearch(userCoords.latitude, userCoords.longitude);
+        } else if (address && address !== 'Using current location...') {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.error) {
-                        bookingFeedback.textContent = data.error;
-                    } else {
-                        bookingFeedback.textContent = 'Booking confirmed!';
-                        setTimeout(() => {
-                            bookingModal.style.display = 'none';
-                        }, 1500);
-                    }
-                })
-                .catch(() => {
-                    bookingFeedback.textContent = 'Error submitting booking.';
+                    if (data && data.length > 0) doSearch(parseFloat(data[0].lat), parseFloat(data[0].lon));
+                    else alert('Could not find location for the address provided.');
                 });
-            },
-            prefill: {
-                name: bookingData.user_name,
-                email: bookingData.user_email,
-                contact: bookingData.user_phone
-            },
-            theme: { color: '#3399cc' }
-        };
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-    });
-}; 
+        } else {
+            alert('Please enter an address or use your current location.');
+        }
+    };
 
-// Logout functionality
-document.getElementById('logoutBtn').addEventListener('click', function() {
-    // Clear user data from localStorage
-    localStorage.removeItem('token');
-    
-    // Redirect to login page
-    window.location.href = '/user-login';
-}); 
+    // Using event delegation for dynamically created "Book" buttons
+    document.getElementById('salonResults').addEventListener('click', (e) => {
+        if (e.target.classList.contains('book-appointment-btn')) {
+            const businessId = e.target.dataset.businessId;
+            const bookingDate = e.target.dataset.bookingDate;
+            bookAppointment(businessId, bookingDate);
+        }
+    });
+
+    closeBookingModal.onclick = () => bookingModal.style.display = 'none';
+    window.onclick = e => { if (e.target === bookingModal) bookingModal.style.display = 'none'; };
+
+    function bookAppointment(businessId, bookingDate) {
+        const serviceName = document.getElementById('serviceSelect').value;
+        if (!serviceName) return alert('Please select a service first.');
+
+        fetch(`/api/business-manage/services?business_id=${businessId}`)
+            .then(res => res.json())
+            .then(data => {
+                const service = (data.services || []).find(s => s.name === serviceName);
+                if (!service) return alert('The selected service is not available at this salon.');
+                openBookingModal(businessId, service.service_id, bookingDate, service.name, service.price);
+            });
+    }
+
+    function openBookingModal(businessId, serviceId, bookingDate, serviceName, servicePrice) {
+        bookingModal.style.display = 'flex';
+        bookingFeedback.textContent = '';
+        document.getElementById('modalBusinessId').value = businessId;
+        document.getElementById('modalServiceId').value = serviceId;
+        document.getElementById('modalBookingDate').value = bookingDate;
+        document.getElementById('modalServiceName').textContent = serviceName;
+        document.getElementById('modalServicePrice').textContent = `Price: ₹${parseFloat(servicePrice).toFixed(2)}`;
+
+        fetch('/api/users/available-slots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ business_id: Number(businessId), service_id: Number(serviceId), booking_date: bookingDate })
+        })
+        .then(res => res.json())
+        .then(data => {
+            modalTimeSlot.innerHTML = '<option value="">-- Select a time --</option>';
+            if (data.slots && data.slots.length > 0) {
+                data.slots.forEach(slot => modalTimeSlot.appendChild(new Option(slot, slot)));
+            } else {
+                modalTimeSlot.innerHTML = '<option value="" disabled>No slots available for this day</option>';
+            }
+        });
+    }
+
+    // ✅ FIX: This is the complete, corrected, and clean onsubmit handler.
+    bookingForm.onsubmit = function(e) {
+        e.preventDefault();
+        bookingFeedback.textContent = 'Processing payment...';
+
+        const priceText = document.getElementById('modalServicePrice').textContent;
+        const price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
+
+        if (!price || price <= 0 || !modalTimeSlot.value) {
+            bookingFeedback.textContent = 'Please select a valid time slot.';
+            return;
+        }
+
+        fetch('/api/business-manage/razorpay/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ amount: price, currency: 'INR', receipt: `receipt_${Date.now()}` })
+        })
+        .then(res => {
+            if (!res.ok) return res.json().then(err => Promise.reject(err.error || 'Server rejected the request.'));
+            return res.json();
+        })
+        .then(order => {
+            const bookingData = {
+                user_id: user.user_id,
+                business_id: Number(document.getElementById('modalBusinessId').value),
+                service_id: Number(document.getElementById('modalServiceId').value),
+                booking_date: document.getElementById('modalBookingDate').value,
+                booking_time: document.getElementById('modalTimeSlot').value,
+                user_name: user.name,
+                user_email: user.email,
+                user_phone: user.phone
+            };
+
+            const options = {
+                key: 'rzp_test_faeo7QJwMjht8t', // This should ideally come from the server
+                amount: order.amount,
+                currency: order.currency,
+                name: 'Salon Appointment',
+                description: `Booking for ${document.getElementById('modalServiceName').textContent}`,
+                order_id: order.id,
+                handler: function(response) {
+                    // Payment successful, now create the final booking in the database
+                    fetch('/api/business-manage/bookings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({
+                            ...bookingData,
+                            payment_id: response.razorpay_payment_id,
+                            payment_status: 'paid'
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.error) {
+                            bookingFeedback.textContent = 'Payment successful, but failed to confirm booking: ' + data.error;
+                        } else {
+                            bookingFeedback.textContent = 'Booking Confirmed! An email has been sent.';
+                            setTimeout(() => {
+                                bookingModal.style.display = 'none';
+                                document.getElementById('salonResults').innerHTML = '<p>Your booking is complete! Check "My Bookings" for details.</p>';
+                            }, 3000);
+                        }
+                    });
+                },
+                prefill: { name: user.name, email: user.email, contact: user.phone },
+                theme: { color: '#4A90E2' }
+            };
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+        })
+        .catch(err => {
+            bookingFeedback.textContent = `Failed to create payment order: ${err}`;
+        });
+    };
+
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        window.location.href = '/user-login';
+    });
+});
