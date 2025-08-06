@@ -94,4 +94,17 @@ router.get('/business-ratings', (req, res) => {
     res.sendFile(path.join(__dirname, '../views', 'business-ratings.html'));
 });
 
+const { checkAndSendReminders } = require('../services/cronjobs');
+
+// This is a secret route. You should add some security in a real app.
+router.get('/_internal/trigger-reminders', (req, res) => {
+    console.log("Received request to manually trigger reminder job.");
+    
+    // Call the exported cron job logic
+    checkAndSendReminders();
+
+    // Send an immediate response to the browser
+    res.status(200).send("Reminder job has been triggered. Check your server console for logs.");
+});
+
 module.exports = router; 

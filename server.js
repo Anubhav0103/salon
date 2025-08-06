@@ -16,7 +16,7 @@ const businessManageRoutes = require('./routes/businessManageRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 
 require('./config/database');
-require('./services/cronJobs');
+require('./services/cronjobs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
